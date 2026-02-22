@@ -14,7 +14,9 @@ dotenv.config();
 const app = express();
 
 // Middlewares
-app.use(cors());
+app.use(cors({
+  origin: "https://21-days-sigma.vercel.app"
+}));
 app.use(express.json());
 
 // Routes
