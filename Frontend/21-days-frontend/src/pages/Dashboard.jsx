@@ -17,7 +17,7 @@ import ChallengeBoard from "../sections/ChallengeBoard";
 import AnalyticsDashboard from "../components/AnalyticsDashboard";
 import CalendarHeatmap from "../components/CalendarHeatmap";
 
-const API = "http://localhost:5000/api";
+const API = "https://two1-days-rlrw.onrender.com/api";
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("dashboard");

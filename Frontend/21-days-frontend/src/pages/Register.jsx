@@ -16,7 +16,7 @@ const handleSubmit = async (e) => {
 
   try {
     const res = await axios.post(
-      "http://localhost:5000/api/auth/register",
+      "https://two1-days-rlrw.onrender.com/api/auth/register",
       form
     );
 

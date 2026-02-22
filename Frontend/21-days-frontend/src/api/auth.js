@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:5000/api/auth";
+const API_URL = "https://two1-days-rlrw.onrender.com/api/auth";
 
 export const registerUser = async (data) => {
   const res = await axios.post(`${API_URL}/register`, data);

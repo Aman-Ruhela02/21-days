@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-const API = "http://localhost:5000/api";
+const API = "https://two1-days-rlrw.onrender.com/api";
 
 export default function CalendarHeatmap() {
   const [data, setData] = useState([]);
