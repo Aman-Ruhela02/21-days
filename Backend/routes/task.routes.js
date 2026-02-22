@@ -1,0 +1,17 @@
+import express from "express";
+import { auth } from "../middlewares/auth.middleware.js";
+import {
+  getTasks,
+  createTask,
+  updateTask,
+  deleteTask
+} from "../controllers/task.controller.js";
+
+const router = express.Router();
+
+router.get("/", auth, getTasks);
+router.post("/", auth, createTask);
+router.put("/:id", auth, updateTask);
+router.delete("/:id", auth, deleteTask);
+
+export default router;
