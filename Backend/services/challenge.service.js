@@ -202,7 +202,17 @@ export async function restartChallenge(userId) {
     }
   );
 
-  // 3. Create fresh 21-day challenge
+  // 3. GET USER CUSTOM TASKS
+  const userTasks = await UserTask.find({
+    user: userId,
+    isActive: true,
+  });
+
+  if (userTasks.length === 0) {
+    throw new Error("Please create tasks before restarting a challenge");
+  }
+
+  // 4. Create fresh 21-day challenge
   const startDate = getDateString(new Date(), 0);
   const days = [];
 
@@ -210,8 +220,8 @@ export async function restartChallenge(userId) {
     days.push({
       dayNumber: i,
       date: getDateString(new Date(), i - 1),
-      tasks: DAILY_TASKS.map((task) => ({
-        name: task,
+      tasks: userTasks.map(task => ({
+        taskId: task._id,
         status: "PENDING",
       })),
       completed: false,

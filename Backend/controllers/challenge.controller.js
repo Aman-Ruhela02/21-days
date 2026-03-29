@@ -8,7 +8,8 @@ import { create21DayChallenge } from "../services/challenge.service.js";
 
 export async function startChallenge(req, res) {
   try {
-    const challenge = await create21DayChallenge(req.user.id);
+    let challenge = await create21DayChallenge(req.user.id);
+    challenge = await Challenge.findById(challenge._id).populate("days.tasks.taskId");
     res.json({ success: true, challenge });
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -37,7 +38,8 @@ export async function getActiveChallengeController(req, res) {
 
 export async function restart(req, res) {
   try {
-    const challenge = await restartChallenge(req.user.id);
+    let challenge = await restartChallenge(req.user.id);
+    challenge = await Challenge.findById(challenge._id).populate("days.tasks.taskId");
     res.json({ success: true, challenge });
   } catch (err) {
     res.status(400).json({ message: err.message });

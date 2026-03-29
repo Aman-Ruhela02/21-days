@@ -17,14 +17,7 @@ router.post("/restart", auth, restart);
 router.post("/fail", auth, fail);
 router.post("/complete", auth, completeTask);
 router.get("/heatmap", auth, getHeatmapData);
-router.post("/start", auth, async (req, res) => {
-  try {
-    const challenge = await create21DayChallenge(req.user.id);
-    res.json({ success: true, challenge });
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-});
+router.post("/start", auth, startChallenge);
 
 // test route
 router.post("/complete-test", (req, res) => {
