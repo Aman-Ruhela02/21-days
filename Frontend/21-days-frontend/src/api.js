@@ -1,8 +1,16 @@
 import axios from "axios";
 import { toast } from "react-toastify";
 
+const isProduction = import.meta.env.MODE === "production";
+const envApiUrl = import.meta.env.VITE_API_URL;
+
+// Prevent using localhost in production even if it's accidentally baked into .env
+const baseURL = (isProduction && envApiUrl?.includes("localhost")) 
+  ? "https://two1-days-rlrw.onrender.com/api" 
+  : (envApiUrl || "https://two1-days-rlrw.onrender.com/api");
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "https://two1-days-rlrw.onrender.com/api",
+  baseURL,
 });
 
 // Request Interceptor: Attach token
