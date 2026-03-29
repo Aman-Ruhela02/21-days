@@ -14,8 +14,14 @@ dotenv.config();
 const app = express();
 
 // Middlewares
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://21-days-sigma.vercel.app",
+  process.env.CLIENT_URL
+].filter(Boolean);
+
 app.use(cors({
-  origin: "https://21-days-sigma.vercel.app"
+  origin: allowedOrigins
 }));
 app.use(express.json());
 
@@ -35,6 +41,14 @@ app.get("/api/test/protected", auth, (req, res) => {
   res.json({
     message: "You are authorized",
     user: req.user,
+  });
+});
+// Global Error Handler
+app.use((err, req, res, next) => {
+  console.error("🔥 Global Error Details:", err.stack);
+  res.status(err.status || 500).json({
+    success: false,
+    message: err.message || "Internal Server Error",
   });
 });
 

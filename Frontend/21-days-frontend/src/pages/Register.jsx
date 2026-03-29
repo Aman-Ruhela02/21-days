@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { registerUser } from "../api/auth.js";
-import axios from "axios"
-
+import api from "../api";
 function Register() {
   const navigate = useNavigate();
   const [form, setForm] = useState({ username: "", email: "", password: "" });
@@ -15,8 +13,8 @@ const handleSubmit = async (e) => {
   setError("");
 
   try {
-    const res = await axios.post(
-      "https://two1-days-rlrw.onrender.com/api/auth/register",
+    const res = await api.post(
+      "/auth/register",
       form
     );
 

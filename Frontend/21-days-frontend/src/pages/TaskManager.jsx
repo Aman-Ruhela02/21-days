@@ -1,48 +1,54 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
-import { toast } from "react-toastify";
-
-const API = "https://two1-days-rlrw.onrender.com/api";
+import api from "../api";
 
 export default function TaskManager({ onTaskChange, onStartChallenge, hasChallenge }) {
   const [tasks, setTasks] = useState([]);
   const [name, setName] = useState("");
 
-  const auth = {
-    headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
-  };
-
   const fetchTasks = async () => {
-    const res = await axios.get(`${API}/tasks`, auth);
-    setTasks(res.data.tasks || []);
+    try {
+      const res = await api.get(`/tasks`);
+      setTasks(res.data.tasks || []);
+    } catch (err) {
+      toast.error("Failed to load tasks");
+    }
   };
 
   useEffect(() => {
     fetchTasks();
   }, []);
 
-  const addTask = async () => {
+  const addTask = async (e) => {
+    e.preventDefault();
     if (!name.trim()) return toast.error("Task name required");
 
-    await axios.post(`${API}/tasks`, { name }, auth);
-    setName("");
-    fetchTasks();
-    onTaskChange?.();
-    toast.success("Task added ✅");
+    try {
+      await api.post(`/tasks`, { name });
+      setName("");
+      fetchTasks();
+      onTaskChange?.();
+      toast.success("Task added ✅");
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to add task");
+    }
   };
 
   const deleteTask = async (id) => {
-    await axios.delete(`${API}/tasks/${id}`, auth);
-    fetchTasks();
-    onTaskChange?.();
-    toast.success("Task deleted");
+    try {
+      await api.delete(`/tasks/${id}`);
+      fetchTasks();
+      onTaskChange?.();
+      toast.success("Task deleted");
+    } catch (err) {
+      toast.error("Failed to delete task");
+    }
   };
 
   return (
     <div className="bg-white p-5 rounded-xl shadow max-w-xl mx-auto">
       <h2 className="text-xl font-bold mb-4">Your Daily Tasks</h2>
 
-      <div className="flex gap-2 mb-4">
+      <form onSubmit={addTask} className="flex gap-2 mb-4">
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
@@ -50,12 +56,12 @@ export default function TaskManager({ onTaskChange, onStartChallenge, hasChallen
           placeholder="e.g. Gym, Read 20 min"
         />
         <button
-          onClick={addTask}
+          type="submit"
           className="bg-blue-600 text-white px-4 rounded-lg"
         >
           Add
         </button>
-      </div>
+      </form>
 
       <ul className="space-y-3 mb-6">
         {tasks.map(t => (

@@ -55,11 +55,11 @@ export const deleteTask = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // 1️⃣ Delete from UserTask
-    await UserTask.findOneAndDelete({
-      _id: id,
-      user: req.user.id,
-    });
+    // 1️⃣ Soft Delete from UserTask
+    await UserTask.findOneAndUpdate(
+      { _id: id, user: req.user.id },
+      { isActive: false }
+    );
 
     // 2️⃣ Remove from ACTIVE challenge
     await removeTaskFromActiveChallenge(req.user.id, id);

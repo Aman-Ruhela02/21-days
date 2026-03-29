@@ -1,20 +1,17 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
-
-const API = "https://two1-days-rlrw.onrender.com/api";
+import api from "../api";
 
 export default function CalendarHeatmap() {
   const [data, setData] = useState([]);
 
   useEffect(() => {
     const fetchHeatmap = async () => {
-      const token = localStorage.getItem("token");
-
-      const res = await axios.get(`${API}/challenge/heatmap`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      setData(res.data.heatmap);
+      try {
+        const res = await api.get(`/challenge/heatmap`);
+        setData(res.data.heatmap || []);
+      } catch (err) {
+        console.error("Failed to load heatmap", err);
+      }
     };
 
     fetchHeatmap();

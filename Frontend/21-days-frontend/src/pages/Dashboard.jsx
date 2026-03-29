@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../api";
 import { useNavigate } from "react-router-dom";
 import { FaMoon, FaSun, FaBars, FaTimes } from "react-icons/fa";
 
@@ -17,26 +17,16 @@ import ChallengeBoard from "../sections/ChallengeBoard";
 import AnalyticsDashboard from "../components/AnalyticsDashboard";
 import CalendarHeatmap from "../components/CalendarHeatmap";
 
-const API = "https://two1-days-rlrw.onrender.com/api";
-
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [challenge, setChallenge] = useState(null);
   const [tasks, setTasks] = useState([]);
   const [user, setUser] = useState({});
-  const [darkMode, setDarkMode] = useState(
-  localStorage.getItem("theme") === "dark"
-);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
- 
-
-
-  const auth = {
-    headers: { Authorization: `Bearer ${token}` }
-  };
 
   const logout = () => {
     localStorage.removeItem("token");
@@ -45,46 +35,46 @@ export default function Dashboard() {
 
   /* ---------- FETCH ---------- */
 
-  const fetchUser = async () => {
-    const res = await axios.get(`${API}/auth/me`, auth);
-    setUser(res.data.user);
-  };
-
-  const fetchTasks = async () => {
-    const res = await axios.get(`${API}/tasks`, auth);
-    setTasks(res.data.tasks || []);
-  };
-
-  const fetchChallenge = async () => {
-    const res = await axios.get(`${API}/challenge/active`, auth);
-    setChallenge(res.data.challenge || null);
+  const fetchData = async () => {
+    try {
+      setIsLoading(true);
+      const [userRes, tasksRes, challengeRes] = await Promise.all([
+        api.get(`/auth/me`),
+        api.get(`/tasks`),
+        api.get(`/challenge/active`),
+      ]);
+      setUser(userRes.data.user);
+      setTasks(tasksRes.data.tasks || []);
+      setChallenge(challengeRes.data.challenge || null);
+    } catch (err) {
+      console.error("Dashboard data error", err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
     if (!token) return logout();
-    fetchUser();
-    fetchTasks();
-    fetchChallenge();
+    fetchData();
   }, []);
 
   /* ---------- ACTIONS ---------- */
 
   const startChallenge = async () => {
     try {
-      const res = await axios.post(`${API}/challenge/start`, {}, auth);
+      const res = await api.post(`/challenge/start`, {});
       setChallenge(res.data.challenge);
       toast.success("Challenge started 🚀");
       setActiveTab("dashboard");
     } catch (err) {
-      toast.error(err.response?.data?.message);
+      toast.error(err.response?.data?.message || "Failed to start challenge");
     }
   };
 
   const toggleTask = async (dayNumber, taskIndex) => {
-    const res = await axios.post(
-      `${API}/challenge/complete`,
-      { dayNumber, taskIndex },
-      auth
+    const res = await api.post(
+      `/challenge/complete`,
+      { dayNumber, taskIndex }
     );
     setChallenge(res.data.challenge);
   };
@@ -139,16 +129,19 @@ export default function Dashboard() {
           <h1 className="font-bold text-lg">Dashboard</h1>
         </div>
 
-        {activeTab === "tasks" && (
-          <TaskManager
-            hasChallenge={!!challenge}
-            onStartChallenge={startChallenge}
-            onTaskChange={() => {
-              fetchTasks();
-              fetchChallenge();
-            }}
-          />
-        )}
+        {isLoading ? (
+          <div className="flex items-center justify-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          </div>
+        ) : (
+          <>
+            {activeTab === "tasks" && (
+              <TaskManager
+                hasChallenge={!!challenge}
+                onStartChallenge={startChallenge}
+                onTaskChange={fetchData}
+              />
+            )}
 
         {activeTab === "dashboard" && (
           <>
@@ -182,6 +175,8 @@ export default function Dashboard() {
             <AnalyticsDashboard days={challenge.days} />
             <CalendarHeatmap />
           </div>
+        )}
+        </>
         )}
       </main>
 
